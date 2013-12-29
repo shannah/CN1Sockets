@@ -13,6 +13,10 @@ Currently this won't work in the emulator (i.e. the JavaSE port) because Codenam
 
 ~~~~
 
+import ca.weblite.codename1.net.Socket;
+// .. rest of imports
+
+
 // … your application's main class
 
     public void start(){
