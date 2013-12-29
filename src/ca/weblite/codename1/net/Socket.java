@@ -47,8 +47,13 @@ public class Socket {
     }
     
     public static boolean isSocketSupported(){
-        NativeSocket s = (NativeSocket)NativeLookup.create(NativeSocket.class);
-        return s.isSupported();
+        try {
+            NativeSocket s = (NativeSocket)NativeLookup.create(NativeSocket.class);
+
+            return s != null && s.isSupported();
+        } catch ( Exception ex){
+            return false;
+        }
     }
     
     public Socket(String host, int port, int timeout) throws IOException {
