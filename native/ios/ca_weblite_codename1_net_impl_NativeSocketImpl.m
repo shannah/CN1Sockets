@@ -142,21 +142,14 @@
         return -1;
     }
     errorMessage = NULL;
-    NSLog(@"About to get buffer");
     org_xmlvm_runtime_XMLVMArray* byteArray = ca_weblite_codename1_net_Socket_getBuffer___int(bufferId);
-    NSLog(@"Buffer gotten");
     JAVA_ARRAY_BYTE* buffer = (JAVA_ARRAY_BYTE*)byteArray->fields.org_xmlvm_runtime_XMLVMArray.array_;
-    NSLog(@"Buffer converted to byte array");
     if ( len > byteArray->fields.org_xmlvm_runtime_XMLVMArray.length_){
-        NSLog(@"Len is too long");
         errorMessage = @"Attempt to read byte array longer than the buffer.";
         return -2;
     }
-    NSLog(@"About to read to buffer");
     int bytesRead = [inputStream read:buffer maxLength:len];
-    NSLog(@"Bytes read %d", bytesRead);
     if ( bytesRead == -1 ){
-        NSLog(@"Bytes read -1");
         errorMessage = [[inputStream streamError] localizedDescription];
         return -2;
     } else if ( bytesRead == 0 ){

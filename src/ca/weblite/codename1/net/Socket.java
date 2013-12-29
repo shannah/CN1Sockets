@@ -46,13 +46,17 @@ public class Socket {
         this(host, port, 30);
     }
     
+    public static boolean isSocketSupported(){
+        NativeSocket s = (NativeSocket)NativeLookup.create(NativeSocket.class);
+        return s.isSupported();
+    }
+    
     public Socket(String host, int port, int timeout) throws IOException {
         this.host = host;
         this.port = port;
         this.peer = (NativeSocket)NativeLookup.create(NativeSocket.class);
-        Log.p("We have the peer");
         if ( !this.peer.isSupported() ){
-            Log.p("Not supported");
+            throw new IOException("Sockets aren't supported on this system.");
         }
         this.peer.createSocket(this.host, this.port);
         this.peer.setBufferId(createBuffer(receiveBufferSize));
@@ -169,9 +173,7 @@ public class Socket {
         
         @Override
         public int read() throws IOException {
-            Log.p("About to read single byte");
             int res = peer.read();
-            Log.p("Single byte read");
             if ( res == -2 ){
                 throw new IOException(peer.getErrorMessage());
             }
@@ -180,34 +182,27 @@ public class Socket {
 
         @Override
         public int read(byte[] b) throws IOException {
-            Log.p("About to read length "+b.length);
             int res = peer.readBuf(b.length);
-            Log.p("Read length : "+res);
             if ( res == -2 ){
                 throw new IOException(peer.getErrorMessage());
             }
             if ( res > 0 ){
-                Log.p("About to copy array to buffer");
                 byte[] buf = getBuffer(peer.getBufferId());
                 System.arraycopy(buf, 0, b, 0, res);
-                Log.p("Finished copying array to buffer");
             }
             return res;
         }
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
-            Log.p("Reading at offset "+off+" with len "+len);
             int res = peer.readBuf(len);
-            Log.p("Completed read "+res);
             if ( res == -2 ){
                 throw new IOException(peer.getErrorMessage());
             }
             if ( res > 0 ){
                 byte[] buf = getBuffer(peer.getBufferId());
-                Log.p("About to copy array to buffer");
                 System.arraycopy(buf, 0, b, off, len);
-                Log.p("Finished copying array to buffer");
+
             }
             return res;
         }
