@@ -23,8 +23,8 @@ public class Socket {
     private int timeout;
     private SocketInputStream is;
     private SocketOutputStream os;
-    private int receiveBufferSize = 4096;
-    private int sendBufferSize = 4096;
+    private int receiveBufferSize = 8192;
+    private int sendBufferSize = 8192;
     
     private static int nextBufferId = 0;
     private static ArrayList<byte[]> buffers = new ArrayList<byte[]>();
@@ -55,6 +55,7 @@ public class Socket {
             Log.p("Not supported");
         }
         this.peer.createSocket(this.host, this.port);
+        this.peer.setBufferId(createBuffer(receiveBufferSize));
         this.timeout = timeout;
         this.connect();
     }
@@ -168,7 +169,9 @@ public class Socket {
         
         @Override
         public int read() throws IOException {
+            Log.p("About to read single byte");
             int res = peer.read();
+            Log.p("Single byte read");
             if ( res == -2 ){
                 throw new IOException(peer.getErrorMessage());
             }
@@ -177,26 +180,34 @@ public class Socket {
 
         @Override
         public int read(byte[] b) throws IOException {
+            Log.p("About to read length "+b.length);
             int res = peer.readBuf(b.length);
+            Log.p("Read length : "+res);
             if ( res == -2 ){
                 throw new IOException(peer.getErrorMessage());
             }
             if ( res > 0 ){
+                Log.p("About to copy array to buffer");
                 byte[] buf = getBuffer(peer.getBufferId());
                 System.arraycopy(buf, 0, b, 0, res);
+                Log.p("Finished copying array to buffer");
             }
             return res;
         }
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
+            Log.p("Reading at offset "+off+" with len "+len);
             int res = peer.readBuf(len);
+            Log.p("Completed read "+res);
             if ( res == -2 ){
                 throw new IOException(peer.getErrorMessage());
             }
             if ( res > 0 ){
                 byte[] buf = getBuffer(peer.getBufferId());
+                Log.p("About to copy array to buffer");
                 System.arraycopy(buf, 0, b, off, len);
+                Log.p("Finished copying array to buffer");
             }
             return res;
         }

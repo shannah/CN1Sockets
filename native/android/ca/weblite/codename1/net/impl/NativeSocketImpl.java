@@ -200,10 +200,7 @@ public class NativeSocketImpl {
         }
     }
 
-    public boolean connectSocket( int timeout) {
-        // do nothing... connects automatically on creation
-        return true;
-    }
+    
 
     public boolean isSocketConnected() {
         return socket.isConnected();

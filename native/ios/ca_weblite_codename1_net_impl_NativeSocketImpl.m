@@ -17,11 +17,16 @@
     return bufferId;
 }
 
--(void)setBufferId(int id){
+-(void)setBufferId:(int)id{
+    isFinished = NO;
     bufferId = id;
 }
 
 -(int)read{
+    if ( isFinished ){
+        isFinished = NO;
+        return -1;
+    }
     errorMessage = NULL;
     uint8_t buf[1];
     int bytesRead = [inputStream read:buf maxLength:1];
@@ -82,6 +87,7 @@
 }
 
 -(BOOL)write:(int)param{
+    isFinished = NO;
     errorMessage = NULL;
     uint8_t buf[1];
     buf[0] = (uint8_t)param;
@@ -131,20 +137,34 @@
 }
 
 -(int)readBuf:(int)len{
+    if ( isFinished == YES ){
+        isFinished = NO;
+        return -1;
+    }
     errorMessage = NULL;
-    org_xmlvm_runtime_XMLVMArray* byteArray = ca_weblite_codename1_net_Socket_getBuffer(bufferId);
+    NSLog(@"About to get buffer");
+    org_xmlvm_runtime_XMLVMArray* byteArray = ca_weblite_codename1_net_Socket_getBuffer___int(bufferId);
+    NSLog(@"Buffer gotten");
     JAVA_ARRAY_BYTE* buffer = (JAVA_ARRAY_BYTE*)byteArray->fields.org_xmlvm_runtime_XMLVMArray.array_;
+    NSLog(@"Buffer converted to byte array");
     if ( len > byteArray->fields.org_xmlvm_runtime_XMLVMArray.length_){
+        NSLog(@"Len is too long");
         errorMessage = @"Attempt to read byte array longer than the buffer.";
         return -2;
     }
-    int bytesRead = [inputStream read:&buffer maxLength:len];
+    NSLog(@"About to read to buffer");
+    int bytesRead = [inputStream read:buffer maxLength:len];
+    NSLog(@"Bytes read %d", bytesRead);
     if ( bytesRead == -1 ){
+        NSLog(@"Bytes read -1");
         errorMessage = [[inputStream streamError] localizedDescription];
         return -2;
     } else if ( bytesRead == 0 ){
         return -1;
     } else {
+        if ( bytesRead < len ){
+            isFinished = YES;
+        }
         return bytesRead;
     }
 }
@@ -156,7 +176,7 @@
 }
 
 -(int)getErrorCode{
-    if ( errorMessage == NIL ){
+    if ( errorMessage == NULL ){
         return 0;
     } else {
         return 500;
@@ -164,6 +184,7 @@
 }
 
 -(BOOL)createSocket:(NSString*)host param1:(int)port{
+    isFinished = NO;
     CFReadStreamRef readStream;
     CFWriteStreamRef writeStream;
     CFStreamCreatePairWithSocketToHost(NULL, (CFStringRef)host, port, &readStream, &writeStream);
@@ -184,6 +205,7 @@
 }
 
 -(BOOL)writeBuf:(NSData*)buffer{
+    isFinished = NO;
     errorMessage = NULL;
     int bytesWritten = [outputStream write:(const uint8_t*)[buffer bytes] maxLength:[buffer length]];
     if ( bytesWritten == -1 ){
@@ -207,6 +229,7 @@
 }
 
 -(BOOL)connectSocket:(int)timeout{
+    isFinished = NO;
     errorMessage = NULL;
     [inputStream open];
     [outputStream open];
@@ -227,6 +250,7 @@
 }
 
 -(BOOL)resetInputStream{
+    isFinished = NO;
     return NO;
 }
 

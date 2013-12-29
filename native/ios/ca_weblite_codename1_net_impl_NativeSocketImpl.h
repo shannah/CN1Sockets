@@ -1,10 +1,13 @@
 #import <Foundation/Foundation.h>
+#import "xmlvm.h"
+#import "ca_weblite_codename1_net_Socket.h"
 
 @interface ca_weblite_codename1_net_impl_NativeSocketImpl : NSObject {
     NSInputStream* inputStream;
     NSOutputStream* outputStream;
     NSString* errorMessage;
     int bufferId;
+    BOOL isFinished;
 }
 
 -(int)read;
@@ -13,7 +16,7 @@
 -(BOOL)markSupported;
 -(BOOL)setReceiveBufferSize:(int)param;
 -(BOOL)write:(int)param;
--setBufferId:(int)param;
+-(void)setBufferId:(int)param;
 -(int)getBufferId;
 -(BOOL)setSendBufferSize:(int)param;
 -(BOOL)setKeepAlive:(BOOL)param;
