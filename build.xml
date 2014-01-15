@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-    <!--build_version=1.3-->
+    <!--build_version=1.4-->
     
     
-<project name="CN1Sockets" default="default" basedir=".">
-    <description>Builds, tests, and runs the project CN1Sockets.</description>
+<project name="CodenameOneLibrary" default="default" basedir=".">
+    <description>Builds, tests, and runs the project CodenameOneLibrary.</description>
     <import file="nbproject/build-impl.xml"/>
     <property file="codenameone_settings.properties"/>
 
@@ -64,6 +64,7 @@
         <antcall target="buildNativeIOS" />        
         <antcall target="buildNativeRIM" />        
         <antcall target="buildNativeAND" />        
+        <antcall target="buildNativeSE" />        
         <antcall target="buildNativeWIN" />        
         <antcall target="buildNativeME" />       
         <mkdir dir="dist" />
@@ -100,6 +101,24 @@
         <antcall target="createAndZip" />        
     </target>
     
+    <target name="buildNativeSE">
+        <path id="seNativeDir">
+            <fileset dir="native/javase"/>
+        </path> 
+        <property name="test.seDir.property" refid="seNativeDir"/> 
+        <condition property="doesntHaveSeFiles">
+            <equals arg1="" arg2="${test.seDir.property}"/>
+        </condition> 
+
+        <antcall target="createSeZip" />        
+    </target>
+
+    <target name="createSeZip"
+        unless="doesntHaveSeFiles">
+        <echo>Zipping JavaSE native code</echo>
+        <zip basedir="native/javase" compress="false" destfile="build/lib/nativese.zip" />
+    </target>
+
     <target name="createAndZip"
         unless="doesntHaveAndFiles">
         <echo>Zipping Android native code</echo>

@@ -1,7 +1,8 @@
 package ca.weblite.codename1.net.impl;
 
+
 import java.net.Socket;
-public class NativeSocketImpl {
+public class NativeSocketImpl implements ca.weblite.codename1.net.impl.NativeSocket {
     private Socket socket;
     private byte[] receiveBuffer, sendBuffer;
     private Throwable lastError;
@@ -157,7 +158,6 @@ public class NativeSocketImpl {
     }
 
     public boolean connectSocket(int timeout){
-        System.out.println("In connectSocket");
         try {
             socket = new Socket(host, port);
             return true;
@@ -200,6 +200,7 @@ public class NativeSocketImpl {
         }
     }
 
+    
 
     public boolean isSocketConnected() {
         return socket.isConnected();
@@ -241,7 +242,6 @@ public class NativeSocketImpl {
     }
 
     public boolean isSupported() {
-        System.out.println("Checking if supported");
         return true;
     }
 
