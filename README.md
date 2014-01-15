@@ -2,7 +2,7 @@
 
 This library was started as an attempt to add sockets support to Codename One.  I have so far created native interfaces for iOS, Android, Blackberry, and J2ME.  So far I have tested on iOS and Android in light examples and it seems to work ok.  I am not using it in any production environments yet.  If you find bugs, please let me know.
 
-Currently this won't work in the emulator (i.e. the JavaSE port) because Codename One doesn't support native interfaces for the JavaSE port.  You can follow [this issue](https://code.google.com/p/codenameone/issues/detail?id=861&q=native) for the status on this support.
+*Update Jan 15/2014:* Support has now been added for sockets in the JavaSE port so you can now test your socket code in the simulator.
 
 ##Installation
 
