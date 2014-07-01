@@ -50,8 +50,11 @@ import ca.weblite.codename1.net.Socket;
                 sock.getOutputStream().write("GET / HTTP/1.1\r\nHost: example.com\r\n\r\n".getBytes());
 
                 String result = Util.readToString(sock.getInputStream());
+                    // NOTE:  Util.readToString() closes the input stream automatically.
+                    // Don't use it if you need to keep the socket open.  Use
+                    // another mechanism to read the stream.
                 lbl.setText(result);
-                sock.close();
+                //sock.close();
                 Log.p(result);
             } else {
                 lbl.setText("Sockets not supported");
