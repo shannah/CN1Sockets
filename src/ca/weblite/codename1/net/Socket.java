@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -27,13 +29,13 @@ public class Socket {
     private int sendBufferSize = 8192;
     
     private static int nextBufferId = 0;
-    private static ArrayList<byte[]> buffers = new ArrayList<byte[]>();
+    private static Map<Integer,byte[]> buffers = new HashMap<Integer,byte[]>();
     public static byte[] getBuffer(int bufferId){
         return buffers.get(bufferId);
     }
     
     public static int createBuffer(int size){
-        buffers.add(new byte[size]);
+        buffers.put(nextBufferId, new byte[size]);
         return nextBufferId++;
     }
     
