@@ -11,6 +11,10 @@ This library was started as an attempt to add sockets support to Codename One.  
 
 Note:  In some versions of Codename One, you will need to perform an explicit "Build" before it will work in the simulator.  I.e. Right click on your project in the project explorer, and select "Build".  After that you should be able to run it normally in the simulator.
 
+##Workaround for CN1 Build Script Bug
+
+Currently (as of Aug. 25, 2014) there is a [bug](https://code.google.com/p/codenameone/issues/detail?id=1150&q=socket) in the Codename One build scripts that prevents cn1libs that include native components from running on the simulator.  The workaround is essentially to perform a "Clean & Build" on your project before trying to run it in the simulator.  This workaround is described step by step in [this issue](https://code.google.com/p/codenameone/issues/detail?id=1150&q=socket) and this [screencast](http://youtu.be/3rtobVgAcQQ).
+
 ##Usage Example
 
 ~~~~
