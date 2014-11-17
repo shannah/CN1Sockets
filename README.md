@@ -53,7 +53,7 @@ import ca.weblite.codename1.net.Socket;
         try {
             if ( Socket.isSocketSupported() ){
                 Socket sock = new Socket("example.com", 80);
-                sock.getOutputStream().write("GET / HTTP/1.1\r\nHost: example.com\r\n\r\n".getBytes());
+                sock.getOutputStream().write("GET / HTTP/1.0\r\nHost: example.com\r\n\r\n".getBytes());
 
                 String result = Util.readToString(sock.getInputStream());
                     // NOTE:  Util.readToString() closes the input stream automatically.

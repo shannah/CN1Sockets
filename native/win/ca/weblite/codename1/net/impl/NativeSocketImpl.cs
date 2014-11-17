@@ -29,7 +29,7 @@ public class NativeSocketImpl {
         return false;
     }
 
-    public bool setKeepAlive(boolean param) {
+    public bool setKeepAlive(bool param) {
         return false;
     }
 
@@ -41,7 +41,7 @@ public class NativeSocketImpl {
         return false;
     }
 
-    public String  getErrorMessage() {
+    public string  getErrorMessage() {
         return null;
     }
 
@@ -61,7 +61,7 @@ public class NativeSocketImpl {
         return 0;
     }
 
-    public bool createSocket(String param, int param1) {
+    public bool createSocket(string param, int param1) {
         return false;
     }
 
