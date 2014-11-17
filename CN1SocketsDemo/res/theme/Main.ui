@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<component type="Form" name="Main" cloudDestinationProperty="Main" layout="BorderLayout" borderLayoutAbsoluteCenter="false" title="Hi World" >
+  <component type="Button" name="sendButton" cloudDestinationProperty="sendButton" text="Send Request" >
+    <layoutConstraint value="North" />
+  </component>
+  <component type="TextArea" name="responseArea" cloudBoundProperty="text" cloudDestinationProperty="responseArea" text="TextArea" >
+    <layoutConstraint value="Center" />
+  </component>
+</component>
