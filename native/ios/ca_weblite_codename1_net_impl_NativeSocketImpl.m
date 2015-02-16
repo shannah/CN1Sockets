@@ -142,9 +142,15 @@
         return -1;
     }
     errorMessage = NULL;
+#ifndef NEW_CODENAME_ONE_VM
     org_xmlvm_runtime_XMLVMArray* byteArray = ca_weblite_codename1_net_Socket_getBuffer___int(bufferId);
     JAVA_ARRAY_BYTE* buffer = (JAVA_ARRAY_BYTE*)byteArray->fields.org_xmlvm_runtime_XMLVMArray.array_;
     if ( len > byteArray->fields.org_xmlvm_runtime_XMLVMArray.length_){
+#else
+    JAVA_ARRAY byteArray = (JAVA_ARRAY)ca_weblite_codename1_net_Socket_getBuffer___int_R_byte_1ARRAY(CN1_THREAD_GET_STATE_PASS_ARG bufferId);
+    JAVA_ARRAY_BYTE* buffer = (JAVA_ARRAY_BYTE*)byteArray->data;
+    if ( len > byteArray->length){ 
+#endif
         errorMessage = @"Attempt to read byte array longer than the buffer.";
         return -2;
     }
