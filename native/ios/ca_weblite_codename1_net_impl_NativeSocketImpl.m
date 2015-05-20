@@ -237,7 +237,7 @@
 
 
 -(BOOL)isSocketConnected{
-    return ![self isInputStreamShutdown] && ![self isOutputStreamShutdown];
+    return ![self isInputShutdown] && ![self isOutputShutdown];
 }
 
 -(BOOL)isSocketClosed{
