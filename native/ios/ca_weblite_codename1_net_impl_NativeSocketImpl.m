@@ -2,6 +2,18 @@
 
 @implementation ca_weblite_codename1_net_impl_NativeSocketImpl
 
+static void _yield() {
+#ifdef NEW_CODENAME_ONE_VM
+    CN1_YIELD_THREAD;
+#endif
+}
+
+static void _resume() {
+#ifdef NEW_CODENAME_ONE_VM
+    CN1_RESUME_THREAD;
+#endif
+}
+
 -(void)dealloc {
     if ( inputStream != NULL ){
         [inputStream release];
@@ -29,7 +41,9 @@
     }
     errorMessage = NULL;
     uint8_t buf[1];
+    _yield();
     int bytesRead = [inputStream read:buf maxLength:1];
+    _resume();
     if ( bytesRead == -1 ){
         errorMessage = [[inputStream streamError] localizedDescription];
         return -2;
@@ -54,7 +68,9 @@
         } else {
             bytesToRead = bufSize;
         }
+        _yield();
         bytesRead = [inputStream read:buf maxLength:bytesToRead];
+        _resume();
         if ( bytesRead == -1 ){
             errorMessage = [[inputStream streamError] localizedDescription];
             return -2;
@@ -91,8 +107,9 @@
     errorMessage = NULL;
     uint8_t buf[1];
     buf[0] = (uint8_t)param;
-    
+    _yield();
     NSInteger res = [outputStream write:buf maxLength:1];
+    _resume();
     if ( res <= 0 ){
         errorMessage = [[outputStream streamError] localizedDescription];
         return NO;
@@ -154,7 +171,9 @@
         errorMessage = @"Attempt to read byte array longer than the buffer.";
         return -2;
     }
+    _yield();
     int bytesRead = [inputStream read:buffer maxLength:len];
+    _resume();
     if ( bytesRead == -1 ){
         errorMessage = [[inputStream streamError] localizedDescription];
         return -2;
@@ -186,8 +205,9 @@
     isFinished = NO;
     CFReadStreamRef readStream;
     CFWriteStreamRef writeStream;
+    _yield();
     CFStreamCreatePairWithSocketToHost(NULL, (CFStringRef)host, port, &readStream, &writeStream);
-
+    _resume();
     inputStream = (NSInputStream *)readStream;
     outputStream = (NSOutputStream *)writeStream;
     
@@ -206,7 +226,9 @@
 -(BOOL)writeBuf:(NSData*)buffer{
     isFinished = NO;
     errorMessage = NULL;
+    _yield();
     int bytesWritten = [outputStream write:(const uint8_t*)[buffer bytes] maxLength:[buffer length]];
+    _resume();
     if ( bytesWritten == -1 ){
         errorMessage = [[outputStream streamError] localizedDescription];
         return NO;
