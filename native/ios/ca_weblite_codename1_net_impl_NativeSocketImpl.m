@@ -41,9 +41,14 @@ static void _resume() {
     }
     errorMessage = NULL;
     uint8_t buf[1];
-    _yield();
+    _yield(); // Tell the GC that it is OK to collect on us while we're blocked
+    while ([self available] <= 0) {
+        // Since iOS doesn't block infinitely, we need to wait until there is
+        // data to read.
+        usleep(100000);
+    }
     int bytesRead = [inputStream read:buf maxLength:1];
-    _resume();
+    _resume(); // tell the GC that we're back
     if ( bytesRead == -1 ){
         errorMessage = [[inputStream streamError] localizedDescription];
         return -2;
@@ -68,9 +73,14 @@ static void _resume() {
         } else {
             bytesToRead = bufSize;
         }
-        _yield();
+        _yield(); // Tell GC that it is ok to collect our garbage while we're blocked
+        while ([self available] <= 0) {
+            // Since iOS doesn't block infinitely, we need to wait until there is
+            // data to read.
+            usleep(100000);
+        }
         bytesRead = [inputStream read:buf maxLength:bytesToRead];
-        _resume();
+        _resume(); // Tell the GC that we're back
         if ( bytesRead == -1 ){
             errorMessage = [[inputStream streamError] localizedDescription];
             return -2;
@@ -85,10 +95,11 @@ static void _resume() {
 
 -(int)available{
     errorMessage = NULL;
-    uint8_t* buf;
-    NSUInteger len;
-    BOOL available = [inputStream getBuffer:&buf length:&len];
-    return (int)len;
+    BOOL available = [inputStream hasBytesAvailable];
+    if (available)
+        return 1;
+    else
+        return 0;
 }
 
 -(BOOL)markSupported{
@@ -164,119 +175,150 @@ static void _resume() {
     JAVA_ARRAY_BYTE* buffer = (JAVA_ARRAY_BYTE*)byteArray->fields.org_xmlvm_runtime_XMLVMArray.array_;
     if ( len > byteArray->fields.org_xmlvm_runtime_XMLVMArray.length_){
 #else
-    JAVA_ARRAY byteArray = (JAVA_ARRAY)ca_weblite_codename1_net_Socket_getBuffer___int_R_byte_1ARRAY(CN1_THREAD_GET_STATE_PASS_ARG bufferId);
-    JAVA_ARRAY_BYTE* buffer = (JAVA_ARRAY_BYTE*)byteArray->data;
-    if ( len > byteArray->length){ 
+        JAVA_ARRAY byteArray = (JAVA_ARRAY)ca_weblite_codename1_net_Socket_getBuffer___int_R_byte_1ARRAY(CN1_THREAD_GET_STATE_PASS_ARG bufferId);
+        JAVA_ARRAY_BYTE* buffer = (JAVA_ARRAY_BYTE*)byteArray->data;
+        if ( len > byteArray->length){
 #endif
-        errorMessage = @"Attempt to read byte array longer than the buffer.";
-        return -2;
-    }
-    _yield();
-    int bytesRead = [inputStream read:buffer maxLength:len];
-    _resume();
-    if ( bytesRead == -1 ){
-        errorMessage = [[inputStream streamError] localizedDescription];
-        return -2;
-    } else if ( bytesRead == 0 ){
-        return -1;
-    } else {
-        if ( bytesRead < len ){
-            isFinished = YES;
+            errorMessage = @"Attempt to read byte array longer than the buffer.";
+            return -2;
         }
-        return bytesRead;
+        
+        
+        _yield();  // tell the GC that it is OK to do GC while this thread is blocked
+        while ([self available] <= 0) {
+            // Since iOS doesn't block infinitely, we need to wait until there is
+            // data to read.
+            usleep(100000);
+        }
+        int bytesRead = [inputStream read:buffer maxLength:len];
+        _resume(); // Tell the GC that we're back
+        if ( bytesRead == -1 ){
+            errorMessage = [[inputStream streamError] localizedDescription];
+            return -2;
+        } else if ( bytesRead == 0 ){
+            return -1;
+        } else {
+            if ( bytesRead < len ){
+                isFinished = YES;
+            }
+            return bytesRead;
+        }
     }
-}
-
--(BOOL)closeInputStream{
-    errorMessage = NULL;
-    [inputStream close];
-    return YES;
-}
-
--(int)getErrorCode{
-    if ( errorMessage == NULL ){
-        return 0;
-    } else {
-        return 500;
-    }
-}
-
--(BOOL)createSocket:(NSString*)host param1:(int)port{
-    isFinished = NO;
-    CFReadStreamRef readStream;
-    CFWriteStreamRef writeStream;
-    _yield();
-    CFStreamCreatePairWithSocketToHost(NULL, (CFStringRef)host, port, &readStream, &writeStream);
-    _resume();
-    inputStream = (NSInputStream *)readStream;
-    outputStream = (NSOutputStream *)writeStream;
     
-    [inputStream retain];
-    [outputStream retain];
-    return YES;
-}
-
--(BOOL)closeSocket{
-    errorMessage = NULL;
-    [inputStream close];
-    [outputStream close];
-    return YES;
-}
-
--(BOOL)writeBuf:(NSData*)buffer{
-    isFinished = NO;
-    errorMessage = NULL;
-    _yield();
-    int bytesWritten = [outputStream write:(const uint8_t*)[buffer bytes] maxLength:[buffer length]];
-    _resume();
-    if ( bytesWritten == -1 ){
-        errorMessage = [[outputStream streamError] localizedDescription];
-        return NO;
-    } else if ( bytesWritten != [buffer length]){
-        errorMessage = [NSString stringWithFormat:@"Not all bytes in buffer were written.  Buffer length was %d but only wrote %d bytes.", [buffer length], bytesWritten];
+    -(BOOL)closeInputStream{
+        errorMessage = NULL;
+        [inputStream close];
+        return YES;
+    }
+    
+    -(int)getErrorCode{
+        if ( errorMessage == NULL ){
+            return 0;
+        } else {
+            return 500;
+        }
+    }
+    
+    -(BOOL)createSocket:(NSString*)host param1:(int)port{
+        isFinished = NO;
+        CFReadStreamRef readStream;
+        CFWriteStreamRef writeStream;
+        
+        BOOL isSSL = NO;
+        if ([host hasPrefix:@"SSL@"]) {
+            isSSL = YES;
+            host = [host stringByReplacingOccurrencesOfString:@"SSL@" withString:@""];
+            NSLog(@"Connecting to SSL socket %@:%d", host, port);
+        }
+        else {
+            NSLog(@"Connecting to plain socket %@:%d", host, port);
+        }
+        
+        _yield();
+        CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)host, port, &readStream, &writeStream);
+        _resume();
+        
+        inputStream = (__bridge NSInputStream *)readStream;
+        outputStream = (__bridge NSOutputStream *)writeStream;
+        
+        [inputStream retain];
+        [outputStream retain];
+        
+        if (isSSL) {
+            NSDictionary *settings = [ [NSDictionary alloc ]
+                                      initWithObjectsAndKeys:
+                                      [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain,
+                                      [NSNull null], kCFStreamSSLPeerName,
+                                      kCFStreamSocketSecurityLevelNegotiatedSSL, kCFStreamSSLLevel,
+                                      nil ];
+            CFReadStreamSetProperty((CFReadStreamRef)inputStream, kCFStreamPropertySSLSettings, (CFTypeRef)settings);
+            CFWriteStreamSetProperty((CFWriteStreamRef)outputStream, kCFStreamPropertySSLSettings, (CFTypeRef)settings);
+        }
+        
+        return YES;
+    }
+    
+    -(BOOL)closeSocket{
+        errorMessage = NULL;
+        [inputStream close];
+        [outputStream close];
+        return YES;
+    }
+    
+    -(BOOL)writeBuf:(NSData*)buffer{
+        isFinished = NO;
+        errorMessage = NULL;
+        _yield();
+        int bytesWritten = [outputStream write:(const uint8_t*)[buffer bytes] maxLength:[buffer length]];
+        _resume();
+        if ( bytesWritten == -1 ){
+            errorMessage = [[outputStream streamError] localizedDescription];
+            return NO;
+        } else if ( bytesWritten != [buffer length]){
+            errorMessage = [NSString stringWithFormat:@"Not all bytes in buffer were written.  Buffer length was %d but only wrote %d bytes.", [buffer length], bytesWritten];
+            return NO;
+        }
+        return YES;
+    }
+    
+    -(BOOL)flushOutputStream{
+        
+        return YES;
+    }
+    
+    -(BOOL)markInputStream:(int)param{
+        errorMessage = @"Mark not supported";
         return NO;
     }
-    return YES;
-}
-
--(BOOL)flushOutputStream{
     
-    return YES;
-}
-
--(BOOL)markInputStream:(int)param{
-    errorMessage = @"Mark not supported";
-    return NO;
-}
-
--(BOOL)connectSocket:(int)timeout{
-    isFinished = NO;
-    errorMessage = NULL;
-    [inputStream open];
-    [outputStream open];
-    return YES;
-}
-
-
--(BOOL)isSocketConnected{
-    return ![self isInputShutdown] && ![self isOutputShutdown];
-}
-
--(BOOL)isSocketClosed{
-    return ![self isSocketConnected];
-}
-
--(BOOL)writeBuffOffsetLength:(NSData*)param param1:(int)param1 param2:(int)param2{
-    return NO;
-}
-
--(BOOL)resetInputStream{
-    isFinished = NO;
-    return NO;
-}
-
--(BOOL)isSupported{
-    return YES;
-}
-
-@end
+    -(BOOL)connectSocket:(int)timeout{
+        isFinished = NO;
+        errorMessage = NULL;
+        [inputStream open];
+        [outputStream open];
+        return YES;
+    }
+    
+    
+    -(BOOL)isSocketConnected{
+        return ![self isInputShutdown] && ![self isOutputShutdown];
+    }
+    
+    -(BOOL)isSocketClosed{
+        return ![self isSocketConnected];
+    }
+    
+    -(BOOL)writeBuffOffsetLength:(NSData*)param param1:(int)param1 param2:(int)param2{
+        return NO;
+    }
+    
+    -(BOOL)resetInputStream{
+        isFinished = NO;
+        return NO;
+    }
+    
+    -(BOOL)isSupported{
+        return YES;
+    }
+    
+    @end
