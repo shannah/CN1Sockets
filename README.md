@@ -8,6 +8,7 @@ This library was started as an attempt to add sockets support to Codename One.  
 
 1. Copy the [CN1Sockets.cn1lib](https://github.com/shannah/CN1Sockets/raw/master/dist/CN1Sockets.cn1lib) library into your application's `lib` directory.
 2. Right click on your project's icon in the Netbeans project explorer, and select "Refresh Libs"
+3. Add build hint `ios.add_libs=CFNetwork.framework`
 
 Note:  In some versions of Codename One, you will need to perform an explicit "Build" before it will work in the simulator.  I.e. Right click on your project in the project explorer, and select "Build".  After that you should be able to run it normally in the simulator.
 
