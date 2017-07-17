@@ -144,13 +144,13 @@ static void _resume() {
 -(BOOL)isInputShutdown{
     errorMessage = NULL;
     NSStreamStatus status = [inputStream streamStatus];
-    return ( status == NSStreamStatusNotOpen || NSStreamStatusClosed == status );
+    return (status == NSStreamStatusOpening || status == NSStreamStatusNotOpen || NSStreamStatusClosed == status );
 }
 
 -(BOOL)isOutputShutdown{
     errorMessage = NULL;
     NSStreamStatus status = [outputStream streamStatus];
-    return ( status == NSStreamStatusNotOpen || NSStreamStatusClosed == status );
+    return (status == NSStreamStatusOpening ||  status == NSStreamStatusNotOpen || NSStreamStatusClosed == status );
 }
 
 -(NSString*)getErrorMessage{
@@ -296,6 +296,19 @@ static void _resume() {
         errorMessage = NULL;
         [inputStream open];
         [outputStream open];
+        while ([outputStream streamStatus] == NSStreamStatusOpening) {
+            _yield();
+            usleep(100000);
+            _resume();
+        }
+        while ([inputStream streamStatus] == NSStreamStatusOpening) {
+            _yield();
+            usleep(100000);
+            _resume();
+        }
+        if ([self isInputShutdown] || [self isOutputShutdown]) {
+            return NO;
+        }
         return YES;
     }
     

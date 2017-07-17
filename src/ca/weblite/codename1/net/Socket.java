@@ -5,14 +5,15 @@
 package ca.weblite.codename1.net;
 
 import ca.weblite.codename1.net.impl.NativeSocket;
-import com.codename1.io.Log;
 import com.codename1.system.NativeLookup;
+import com.codename1.ui.Display;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  *
@@ -68,6 +69,7 @@ public class Socket {
         this.peer.createSocket(this.host, this.port);
         this.peer.setBufferId(createBuffer(receiveBufferSize));
         this.timeout = timeout;
+        
         this.connect();
     }
     
@@ -80,10 +82,33 @@ public class Socket {
         }
     }
     
+    private boolean connectionTimedOut;
     public final void connect() throws IOException {
-        if ( !peer.connectSocket( timeout)){
-            throw new IOException(peer.getErrorMessage());
+        if (timeout > 0 && "ios".equals(Display.getInstance().getPlatformName()) && !Display.getInstance().isSimulator()) {
+            connectionTimedOut = false;
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                public void run() {
+                    try {
+                        
+                        if (!peer.isSocketConnected()) {
+                            connectionTimedOut = true;
+                            peer.closeSocket();
+                        }
+                    } catch (Throwable t) {
+                        try {
+                            peer.closeSocket();
+                        } catch (Throwable t2) {
+                            
+                        }
+                    }
+                }
+            }, timeout);
         }
+        if ( !peer.connectSocket( timeout)){
+            throw new IOException(connectionTimedOut ? "Failed to connect to server socket because connection timed out: "+peer.getErrorMessage() : peer.getErrorMessage());
+        }
+        
     }
     
     public InputStream getInputStream() throws IOException {

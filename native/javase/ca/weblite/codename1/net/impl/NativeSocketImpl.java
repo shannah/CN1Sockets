@@ -1,6 +1,7 @@
 package ca.weblite.codename1.net.impl;
 
 
+import java.net.InetSocketAddress;
 import java.net.Socket;
 public class NativeSocketImpl implements ca.weblite.codename1.net.impl.NativeSocket {
     private Socket socket;
@@ -159,7 +160,8 @@ public class NativeSocketImpl implements ca.weblite.codename1.net.impl.NativeSoc
 
     public boolean connectSocket(int timeout){
         try {
-            socket = new Socket(host, port);
+            socket = new Socket();
+            socket.connect(new InetSocketAddress(host, port), timeout);
             return true;
             
         } catch ( Throwable t){
