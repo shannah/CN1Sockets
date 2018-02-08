@@ -46,7 +46,7 @@ public class Socket {
     
     
     public Socket(String host, int port) throws IOException {
-        this(host, port, 30);
+        this(host, port, 30000);
     }
     
     public static boolean isSocketSupported(){
