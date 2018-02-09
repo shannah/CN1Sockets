@@ -321,8 +321,20 @@ static void _resume() {
         return ![self isSocketConnected];
     }
     
-    -(BOOL)writeBuffOffsetLength:(NSData*)param param1:(int)param1 param2:(int)param2{
-        return NO;
+    -(BOOL)writeBuffOffsetLength:(NSData*)buffer param1:(int)param1 param2:(int)param2{
+        isFinished = NO;
+        errorMessage = NULL;
+        _yield();
+        int bytesWritten = [outputStream write:((const uint8_t*)[buffer bytes]+param1) maxLength:param2];
+        _resume();
+        if ( bytesWritten == -1 ){
+            errorMessage = [[outputStream streamError] localizedDescription];
+            return NO;
+        } else if ( bytesWritten != param2){
+            errorMessage = [NSString stringWithFormat:@"Not all bytes in buffer were written.  Buffer length was %d but only wrote %d bytes.", [buffer length], bytesWritten];
+            return NO;
+        }
+        return YES;
     }
     
     -(BOOL)resetInputStream{
