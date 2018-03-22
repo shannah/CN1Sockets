@@ -70,6 +70,8 @@
         <antcall target="buildNativeME" />       
         <mkdir dir="dist" />
         <zip basedir="build/lib" compress="true" destfile="dist/${application.title}.cn1lib" />
+        <copy file="dist/${application.title}.cn1lib" todir="CN1SocketsDemo/lib"/>
+        <ant dir="CN1SocketsDemo" target="refresh-libs"/>
     </target>
 
     <target name="buildNativeRIM">

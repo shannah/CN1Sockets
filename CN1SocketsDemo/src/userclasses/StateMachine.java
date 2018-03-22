@@ -51,7 +51,8 @@ public class StateMachine extends StateMachineBase {
     public String runSocketTests(){
         try {
             if ( Socket.isSocketSupported() ){
-                Socket sock = new Socket("example.com", 80);
+                System.out.println("About to connect to example.com");
+                Socket sock = new Socket("example.com", 8080, 2000);
                 sock.getOutputStream().write("GET / HTTP/1.0\r\nHost: example.com\r\n\r\n".getBytes());
                 Log.p("Opened connection to example.com");
                 InputStream is = sock.getInputStream();
@@ -63,6 +64,7 @@ public class StateMachine extends StateMachineBase {
                 
             } 
         } catch ( Exception ex){
+            System.out.println("An exception occurrred opening socket: "+ex.getMessage());
             return ex.getMessage();
 
         }

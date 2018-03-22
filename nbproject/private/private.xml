@@ -13,5 +13,10 @@
             <file>file:/Users/shannah/Documents/Shared/NetBeansProjects/CN1Sockets/manifest.mf</file>
             <file>file:/Users/shannah/Documents/Shared/NetBeansProjects/CN1Sockets/build.xml</file>
         </group>
+        <group name="CN1Sockets">
+            <file>file:/Users/shannah/cn1_files/incubator/CN1Sockets/native/ios/ca_weblite_codename1_net_impl_NativeSocketImpl.m</file>
+            <file>file:/Users/shannah/cn1_files/incubator/CN1Sockets/build.xml</file>
+        </group>
+        <group name="CN1 Base"/>
     </open-files>
 </project-private>

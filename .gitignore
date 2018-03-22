@@ -2,3 +2,7 @@
 /CN1SocketsDemo/nbproject/private/
 /CN1SocketsDemo/build/
 /CN1SocketsDemo/dist/
+/dist
+/lib/impl
+CN1SocketsDemo/lib/impl
+private
