@@ -1,20 +1,16 @@
-#Codename Sockets Library
+# Codename Sockets Library
 
 This library was started as an attempt to add sockets support to Codename One.  I have so far created native interfaces for iOS, Android, Blackberry, JavaSE and J2ME.
 
-##Installation
+## Installation
 
-1. Copy the [CN1Sockets.cn1lib](https://github.com/shannah/CN1Sockets/raw/master/dist/CN1Sockets.cn1lib) library into your application's `lib` directory.
+Install through Codename One Settings > Extensions.  Or manually install with following steps:
+
+
+1. Copy the [CN1Sockets.cn1lib](bin/CN1Sockets.cn1lib) library into your application's `lib` directory.
 2. Right click on your project's icon in the Netbeans project explorer, and select "Refresh Libs"
-3. Add build hint `ios.add_libs=CFNetwork.framework` (if deploying to iOS)
 
-Note:  In some versions of Codename One, you will need to perform an explicit "Build" before it will work in the simulator.  I.e. Right click on your project in the project explorer, and select "Build".  After that you should be able to run it normally in the simulator.
-
-##Workaround for CN1 Build Script Bug
-
-Currently (as of Aug. 25, 2014) there is a [bug](https://code.google.com/p/codenameone/issues/detail?id=1150&q=socket) in the Codename One build scripts that prevents cn1libs that include native components from running on the simulator.  The workaround is essentially to perform a "Clean & Build" on your project before trying to run it in the simulator.  This workaround is described step by step in [this issue](https://code.google.com/p/codenameone/issues/detail?id=1150&q=socket) and this [screencast](http://youtu.be/3rtobVgAcQQ).
-
-##Usage Example
+## Usage Example
 
 ~~~~
 
